@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#111827">
+<title>Raid Assistant — Pokémon GO</title>
+<style>
+:root{color-scheme:dark;--bg:#0b1020;--panel:#151d31;--panel2:#1d2942;--text:#f4f7ff;--muted:#aab6ce;--accent:#8b9cff;--good:#42d392;--warn:#ffca66;--bad:#ff7373}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(160deg,#111a31,#080c17 65%);color:var(--text);font:16px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding:18px 14px 40px}
+main{max-width:720px;margin:auto}h1{font-size:27px;margin:8px 0 4px}h2{font-size:18px;margin:0 0 12px}.sub{color:var(--muted);font-size:13px;margin-bottom:18px}
+.card{background:var(--panel);border:1px solid #293653;border-radius:18px;padding:16px;margin:12px 0;box-shadow:0 8px 24px #0003}
+.row{display:flex;gap:10px;flex-wrap:wrap}.row>*{flex:1;min-width:130px}
+label{display:block;color:var(--muted);font-size:12px;margin:10px 0 5px}
+input,select,button{font:inherit;border-radius:12px;border:1px solid #354361;padding:12px;background:var(--panel2);color:var(--text);width:100%}
+button{font-weight:700;border:0;background:var(--accent);color:#10172b;cursor:pointer;margin-top:10px}
+button.secondary{background:#34425f;color:var(--text)}button.good{background:var(--good);color:#062316}button.danger{background:#63343c;color:#fff}
+.big{font-size:34px;font-weight:800;letter-spacing:1px;text-align:center;margin:10px 0}.muted{color:var(--muted);font-size:13px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.stat{background:var(--panel2);padding:12px;border-radius:12px;text-align:center}.stat b{display:block;font-size:23px}.pill{display:inline-block;background:#293653;color:#dce4ff;border-radius:99px;padding:5px 9px;font-size:12px;margin:3px 3px 3px 0}
+.entry{border-top:1px solid #2a3650;padding:10px 0}.entry:first-child{border:0}.entry b{display:block}.entry small{color:var(--muted)}
+footer{font-size:12px;color:var(--muted);line-height:1.5;margin:18px 4px}
+</style>
+</head>
+<body><main>
+<h1>Raid Assistant</h1><div class="sub">Companheiro de raids para iPhone · funciona offline neste aparelho</div>
+<div class="card">
+<h2>Alvo prioritário</h2>
+<div class="row">
+<div><label>Pokémon</label><select id="target"><option>Zacian</option><option>Zamazenta</option><option>Outro lendário</option></select></div>
+<div><label>Janela / observação</label><input id="note" placeholder="Ex.: 18h–20h, evento"></div>
+</div>
+<div class="row">
+<div><label>Horário de início da raid</label><input id="raidTime" type="datetime-local"></div>
+<div><label>Duração do cronômetro (min)</label><input id="duration" type="number" min="1" max="180" value="45"></div>
+</div>
+<button id="start">Iniciar cronômetro</button><div class="big" id="timer">--:--</div><div class="muted" id="timerStatus" style="text-align:center">Defina o horário e inicie o cronômetro.</div>
+</div>
+<div class="card">
+<h2>Registrar resultado</h2>
+<div class="row">
+<div><label>Pokémon enfrentado</label><select id="boss"><option>Zacian</option><option>Zamazenta</option><option>Outro</option></select></div>
+<div><label>CP capturado</label><input id="cp" type="number" inputmode="numeric" placeholder="Ex.: 2187"></div>
+</div>
+<div class="row">
+<div><label>IV (%)</label><select id="iv"><option value="">Não verificado</option><option>100</option><option>98</option><option>96</option><option>93</option><option>91</option><option>89</option><option>87</option><option>Outro</option></select></div>
+<div><label>Resultado</label><select id="result"><option>Capturado</option><option>Fugiu</option><option>Raid perdida</option></select></div>
+</div>
+<label>Observação (shiny, hundo, grupo etc.)</label><input id="resultNote" placeholder="Ex.: shiny / 15-15-14">
+<button class="good" id="save">Salvar resultado</button>
+</div>
+<div class="card">
+<h2>Seu histórico</h2>
+<div class="stats">
+<div class="stat"><b id="total">0</b><span class="muted">Raids</span></div>
+<div class="stat"><b id="hundos">0</b><span class="muted">Hundos</span></div>
+<div class="stat"><b id="shinies">0</b><span class="muted">Shinies*</span></div>
+</div>
+<div id="history" class="muted" style="margin-top:12px">Nenhum resultado registrado ainda.</div>
+<button class="secondary" id="export">Exportar histórico (.csv)</button>
+<button class="danger" id="clear">Apagar histórico</button>
+<div class="muted">*Shinies são contabilizados quando você escreve “shiny” na observação.</div>
+</div>
+<div class="card">
+<h2>Referência rápida de Hundo</h2>
+<p class="muted">Em raids lendárias com IV mínimo 10/10/10, a chance de um Hundo por captura é 1 em 216 (aprox. 0,46%).</p>
+<div class="row"><div><label>Quantidade de raids</label><input id="attempts" type="number" min="1" value="20"></div><div><label>Chance acumulada</label><div class="big" id="odds" style="font-size:25px">8,9%</div></div></div>
+</div>
+<footer>Este painel não controla o Pokémon GO, não toca na tela e não entra ou combate em raids. Ele organiza horários e registra resultados manualmente. Os dados ficam salvos localmente no navegador deste iPhone.</footer>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+let records=JSON.parse(localStorage.getItem('raidRecords')||'[]'), endAt=null, ticker=null;
+function render(){
+ $('total').textContent=records.length;
+ $('hundos').textContent=records.filter(x=>x.iv==='100').length;
+ $('shinies').textContent=records.filter(x=>x.note.toLowerCase().includes('shiny')).length;
+ $('history').innerHTML=records.length?records.slice().reverse().map(x=>`<div class="entry"><b>${esc(x.boss)} · ${esc(x.result)} ${x.iv==='100'?'🏆 HUNDO':''}</b><small>${esc(x.date)} · CP ${esc(x.cp||'—')} · IV ${esc(x.iv||'—')}% · ${esc(x.note||'sem observação')}</small></div>`).join(''):'Nenhum resultado registrado ainda.';
+ localStorage.setItem('raidRecords',JSON.stringify(records));
+}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+$('save').onclick=()=>{records.push({boss:$('boss').value,cp:$('cp').value,iv:$('iv').value,result:$('result').value,note:$('resultNote').value,date:new Date().toLocaleString('pt-BR')});$('cp').value='';$('resultNote').value='';render();};
+$('clear').onclick=()=>{if(confirm('Apagar todo o histórico deste aparelho?')){records=[];render();}};
+$('export').onclick=()=>{let rows=[['Data','Boss','Resultado','CP','IV','Observacao'],...records.map(x=>[x.date,x.boss,x.result,x.cp,x.iv,x.note])];let csv=rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(';')).join('\n');let a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}));a.download='historico-raids.csv';a.click();URL.revokeObjectURL(a.href);};
+$('attempts').oninput=()=>{let n=Math.max(0,Number($('attempts').value)||0);$('odds').textContent=(100*(1-Math.pow(215/216,n))).toLocaleString('pt-BR',{maximumFractionDigits:1})+'%';};
+$('start').onclick=()=>{let t=new Date($('raidTime').value).getTime();if(!Number.isFinite(t)){alert('Escolha o horário da raid primeiro.');return;}endAt=t+(Number($('duration').value)||45)*60000;if(ticker)clearInterval(ticker);tick();ticker=setInterval(tick,1000);};
+function tick(){let left=Math.max(0,Math.floor((endAt-Date.now())/1000));$('timer').textContent=String(Math.floor(left/60)).padStart(2,'0')+':'+String(left%60).padStart(2,'0');$('timerStatus').textContent=left?'Tempo restante até o fim da janela configurada.':'Janela encerrada.';if(!left&&ticker){clearInterval(ticker);ticker=null;}}
+render();$('attempts').dispatchEvent(new Event('input'));
+</script></body></html>
